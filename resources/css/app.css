@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';
+@source '../**/*.ts';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* Light mode */
+    --color-background: hsl(0 0% 98%);
+    --color-foreground: hsl(224 71% 4%);
+    --color-card: hsl(0 0% 100%);
+    --color-card-foreground: hsl(224 71% 4%);
+    --color-popover: hsl(0 0% 100%);
+    --color-popover-foreground: hsl(224 71% 4%);
+    --color-primary: hsl(221 83% 53%);
+    --color-primary-foreground: hsl(0 0% 100%);
+    --color-secondary: hsl(220 14% 96%);
+    --color-secondary-foreground: hsl(220 9% 46%);
+    --color-muted: hsl(220 14% 96%);
+    --color-muted-foreground: hsl(220 9% 46%);
+    --color-accent: hsl(220 14% 96%);
+    --color-accent-foreground: hsl(224 71% 4%);
+    --color-destructive: hsl(0 72% 51%);
+    --color-destructive-foreground: hsl(0 0% 100%);
+    --color-border: hsl(220 13% 91%);
+    --color-input: hsl(220 13% 91%);
+    --color-ring: hsl(221 83% 53%);
+    --color-success: hsl(142 71% 45%);
+    --color-warning: hsl(38 92% 50%);
+    --radius: 0.5rem;
+    --sidebar-width: 240px;
+}
+
+@layer base {
+    * {
+        border-color: var(--color-border);
+        box-sizing: border-box;
+    }
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    body {
+        background-color: var(--color-background);
+        color: var(--color-foreground);
+        font-family: var(--font-sans);
+        line-height: 1.5;
+    }
+    :focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
+    }
+}
+
+/* Smooth page transitions */
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.page-enter-from {
+    opacity: 0;
+    transform: translateY(4px);
+}
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.skeleton {
+    background: linear-gradient(90deg, var(--color-muted) 25%, var(--color-border) 50%, var(--color-muted) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius);
+}
+
+/* Toast slide-in */
+@keyframes toast-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes toast-out {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+.toast-enter { animation: toast-in 0.25s ease forwards; }
+.toast-leave { animation: toast-out 0.2s ease forwards; }
+
+/* Modal scale-in (TransactionModal) */
+@keyframes modal-scale-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-scale-in { animation: modal-scale-in 0.15s ease; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }
+
+/* Hide scrollbar (for tab bars, horizontal scroll) */
+@layer utilities {
+  .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}

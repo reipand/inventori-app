@@ -1,0 +1,20 @@
+{
+    "style": "default",
+    "typescript": true,
+    "tailwind": {
+        "config": "",
+        "css": "resources/css/app.css",
+        "baseColor": "slate",
+        "cssVariables": true,
+        "prefix": ""
+    },
+    "framework": "vite",
+    "aliases": {
+        "components": "@/components",
+        "utils": "@/lib/utils",
+        "ui": "@/components/ui",
+        "lib": "@/lib",
+        "composables": "@/composables"
+    },
+    "iconLibrary": "lucide"
+}
