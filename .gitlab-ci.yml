@@ -18,7 +18,7 @@ cache:
 
 before_script:
   - apt-get update -yqq
-  - apt-get install -y git unzip curl libzip-dev zip libpng-dev
+  - apt-get install -y git unzip curl libzip-dev zip libpng-dev openssh-client
   - docker-php-ext-install pdo_mysql zip
 
   # Install Composer
@@ -46,7 +46,25 @@ test:
 
 deploy:
   stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
   script:
-    - echo "Deploy ke VPS nanti kita setup SSH"
+    - ssh $SERVER_USER@$SERVER_IP "
+        cd /var/www/inventory_monitoring &&
+        git pull origin main &&
+        composer install --no-dev --optimize-autoloader &&
+        php artisan migrate --force &&
+        php artisan config:cache &&
+        php artisan route:cache &&
+        sudo systemctl restart php8.3-fpm &&
+        sudo systemctl restart nginx
+      "
+
   only:
     - main
