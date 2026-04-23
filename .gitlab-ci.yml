@@ -56,6 +56,9 @@ deploy:
     - mkdir -p ~/.ssh
     - cp "$SSH_PRIVATE_KEY" ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
+    - echo "=== Key bytes ===" && wc -c ~/.ssh/id_ed25519
+    - echo "=== First bytes ===" && od -c ~/.ssh/id_ed25519 | head -3
+    - echo "=== Last bytes ===" && od -c ~/.ssh/id_ed25519 | tail -3
     - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
   script:
     - ssh $SERVER_USER@$SERVER_IP "
