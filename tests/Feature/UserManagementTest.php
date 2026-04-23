@@ -181,7 +181,7 @@ class UserManagementTest extends TestCase
                 'success' => false,
                 'error'   => [
                     'code'    => 'CONFLICT',
-                    'message' => 'Email sudah terdaftar',
+                    'message' => 'Email sudah terdaftar.',
                 ],
             ]);
     }
