@@ -54,14 +54,11 @@ deploy:
   before_script:
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
-    - cp "$SSH_PRIVATE_KEY" ~/.ssh/id_ed25519
+    - tr -d '\r' < "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    - echo "=== Key bytes ===" && wc -c ~/.ssh/id_ed25519
-    - echo "=== First bytes ===" && od -c ~/.ssh/id_ed25519 | head -3
-    - echo "=== Last bytes ===" && od -c ~/.ssh/id_ed25519 | tail -3
     - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
   script:
-    - ssh $SERVER_USER@$SERVER_IP "
+    - ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519 $SERVER_USER@$SERVER_IP "
         cd /var/www/inventory_monitoring &&
         git pull origin main &&
         composer install --no-dev --optimize-autoloader &&
