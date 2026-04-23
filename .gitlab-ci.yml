@@ -1,0 +1,52 @@
+image: php:8.4-cli
+
+services:
+  - mysql:8
+
+variables:
+  MYSQL_DATABASE: inventory_monitoring
+  MYSQL_ROOT_PASSWORD: secret
+  DB_HOST: mysql
+  DB_DATABASE: inventory_monitoring
+  DB_USERNAME: phpmyadmin
+  DB_PASSWORD: Reip@Admin123!
+
+cache:
+  paths:
+    - vendor/
+    - node_modules/
+
+before_script:
+  - apt-get update -yqq
+  - apt-get install -y git unzip curl libzip-dev zip libpng-dev
+  - docker-php-ext-install pdo_mysql zip
+
+  # Install Composer
+  - curl -sS https://getcomposer.org/installer | php
+  - mv composer.phar /usr/local/bin/composer
+
+  # Install dependency
+  - composer install --no-interaction --prefer-dist --optimize-autoloader
+
+  # Setup env
+  - cp .env.example .env || true
+  - php artisan key:generate
+  - php artisan jwt:secret --force
+
+  # Wait DB
+  - sleep 10
+
+  # Migrate
+  - php artisan migrate --force
+
+test:
+  stage: test
+  script:
+    - php artisan test
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy ke VPS nanti kita setup SSH"
+  only:
+    - main
