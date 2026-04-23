@@ -57,12 +57,11 @@ deploy:
     - tr -d '\r' < "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
     - echo >> ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    - echo "Key size:" && wc -c < ~/.ssh/id_ed25519
-    - ssh-keygen -y -f ~/.ssh/id_ed25519 2>&1 && echo "KEY VALID" || echo "KEY INVALID"
     - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
   script:
-    - ssh -v -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519 $SERVER_USER@$SERVER_IP "
+    - ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519 $SERVER_USER@$SERVER_IP "
         cd /var/www/inventory_monitoring &&
+        git remote set-url origin https://gitlab.com/reipand/inventori-app.git &&
         git pull origin main &&
         composer install --no-dev --optimize-autoloader &&
         php artisan migrate --force &&
