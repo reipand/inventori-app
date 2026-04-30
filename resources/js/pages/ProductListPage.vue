@@ -150,6 +150,7 @@
               <th class="th">Kategori</th>
               <th class="th">Satuan</th>
               <th class="th text-right">Harga Jual</th>
+              <th class="th text-right">COGS</th>
               <th class="th text-right">Stok</th>
               <th class="th text-center">Status</th>
               <th class="th text-right">Aksi</th>
@@ -164,6 +165,7 @@
                 <td class="td"><div class="skeleton h-4 w-24 rounded" /></td>
                 <td class="td"><div class="skeleton h-4 w-16 rounded" /></td>
                 <td class="td"><div class="skeleton h-4 w-20 rounded ml-auto" /></td>
+                <td class="td"><div class="skeleton h-4 w-20 rounded ml-auto" /></td>
                 <td class="td"><div class="skeleton h-4 w-12 rounded ml-auto" /></td>
                 <td class="td"><div class="skeleton h-5 w-16 rounded-full mx-auto" /></td>
                 <td class="td"><div class="skeleton h-7 w-36 rounded ml-auto" /></td>
@@ -172,7 +174,7 @@
 
             <!-- Empty state -->
             <tr v-else-if="filteredProducts.length === 0">
-              <td colspan="8" class="py-16 text-center">
+              <td colspan="9" class="py-16 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <div class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
                     <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
@@ -199,6 +201,7 @@
               <td class="td text-gray-500">{{ p.category?.name ?? '—' }}</td>
               <td class="td text-gray-500">{{ p.unit }}</td>
               <td class="td text-right font-medium text-gray-700">{{ fmt(p.sell_price) }}</td>
+              <td class="td text-right font-medium text-gray-500">{{ fmt(p.cogs) }}</td>
               <td class="td text-right">
                 <span :class="p.current_stock === 0 ? 'text-red-600 font-bold' : p.current_stock <= p.min_stock ? 'text-yellow-700 font-semibold' : 'text-gray-900 font-medium'">
                   {{ p.current_stock }}

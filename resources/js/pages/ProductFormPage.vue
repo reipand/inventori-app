@@ -54,6 +54,13 @@
           <input v-model.number="form.min_stock" type="number" min="0" class="input-base" :class="{ 'border-destructive': fe.min_stock }" placeholder="0" :disabled="submitting" />
           <p v-if="fe.min_stock" class="field-error">{{ fe.min_stock }}</p>
         </div>
+        <div v-if="isEdit" class="field">
+          <label class="field-label">COGS (Harga Pokok)</label>
+          <div class="input-base bg-muted/40 text-muted-foreground cursor-default select-none flex items-center">
+            {{ cogsDisplay }}
+          </div>
+          <p class="text-xs text-muted-foreground mt-1">Diperbarui otomatis dari invoice pembelian.</p>
+        </div>
       </div>
 
       <div class="flex justify-end gap-3 pt-2 border-t">
@@ -88,6 +95,12 @@ const fe = ref<Record<string, string>>({});
 
 const form = ref<ProductPayload>({ name: '', sku: '', category_id: '', unit: '', buy_price: 0, sell_price: 0, min_stock: 0 });
 
+const cogs = ref(0);
+
+const cogsDisplay = computed(() =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(cogs.value)
+);
+
 onMounted(async () => {
   getCategories().then((c) => (categories.value = c)).catch(() => {});
   if (isEdit.value && productId.value) {
@@ -95,6 +108,7 @@ onMounted(async () => {
     try {
       const p = await getProduct(productId.value);
       form.value = { name: p.name, sku: p.sku, category_id: p.category_id, unit: p.unit, buy_price: p.buy_price, sell_price: p.sell_price, min_stock: p.min_stock };
+      cogs.value = p.cogs;
     } catch { formError.value = 'Gagal memuat data produk.'; }
     finally { loadingProduct.value = false; }
   }

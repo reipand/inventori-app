@@ -117,12 +117,15 @@ import {
   AlertTriangle,
   BarChart2,
   Bell,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   Menu,
   Package,
   Search,
+  ShoppingCart,
   Tag,
+  TrendingUp,
   Users,
 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
@@ -147,7 +150,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Kategori', path: '/categories', roles: ['pengelola'], icon: Tag },
   { label: 'Inventory', path: '/products', roles: ['pengelola', 'kasir'], icon: Package },
   { label: 'Stok Menipis', path: '/low-stock', roles: ['pengelola'], icon: AlertTriangle },
+  { label: 'Pembelian', path: '/purchase', roles: ['pengelola'], icon: ShoppingCart },
+  { label: 'Kasir', path: '/pos', roles: ['pengelola', 'kasir'], icon: CreditCard },
   { label: 'Laporan', path: '/reports', roles: ['pengelola'], icon: BarChart2 },
+  { label: 'Laporan Profit', path: '/reports/profit', roles: ['pengelola'], icon: TrendingUp },
   { label: 'Users', path: '/users', roles: ['pengelola'], icon: Users },
   { label: 'Notifikasi', path: '/notifications', roles: ['pengelola', 'kasir'], icon: Bell },
 ];
@@ -176,7 +182,9 @@ const visibleItems = computed(() =>
   NAV_ITEMS.filter((item) => item.roles.includes(role.value as 'pengelola' | 'kasir'))
 );
 const currentPageTitle = computed(() => {
-  const match = NAV_ITEMS.find((item) => route.path.startsWith(item.path));
+  // Sort by path length descending so more specific paths match first (e.g. /reports/profit before /reports)
+  const sorted = [...NAV_ITEMS].sort((a, b) => b.path.length - a.path.length);
+  const match = sorted.find((item) => route.path.startsWith(item.path));
   return match?.label ?? 'Inventori';
 });
 const userInitial = computed(() => (auth.user?.email?.charAt(0) ?? 'U').toUpperCase());

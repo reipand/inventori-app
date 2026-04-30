@@ -10,6 +10,7 @@ export interface Product {
     unit: string;
     buy_price: number;
     sell_price: number;
+    cogs: number;
     min_stock: number;
     current_stock: number;
     created_at: string;

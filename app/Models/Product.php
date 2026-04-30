@@ -22,6 +22,7 @@ class Product extends Model
         'unit',
         'buy_price',
         'sell_price',
+        'cogs',
         'min_stock',
         'current_stock',
     ];
@@ -31,6 +32,7 @@ class Product extends Model
         return [
             'buy_price' => 'decimal:2',
             'sell_price' => 'decimal:2',
+            'cogs' => 'decimal:2',
             'min_stock' => 'integer',
             'current_stock' => 'integer',
         ];

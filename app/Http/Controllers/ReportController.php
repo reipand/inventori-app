@@ -6,10 +6,99 @@ use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
+    /**
+     * GET /api/reports/profit
+     * Laporan profit berdasarkan sale_items dengan filter tanggal.
+     * Menghitung revenue, COGS, profit, dan margin untuk periode yang dipilih.
+     * Hanya Pengelola yang dapat mengakses.
+     */
+    public function profit(Request $request): JsonResponse
+    {
+        $startDate = $request->query('start_date');
+        $endDate   = $request->query('end_date');
+
+        // Validasi rentang tanggal jika keduanya diberikan
+        if ($startDate && $endDate && $startDate > $endDate) {
+            return response()->json([
+                'success' => false,
+                'error'   => [
+                    'code'    => 'VALIDATION_ERROR',
+                    'message' => 'Tanggal awal tidak boleh lebih besar dari tanggal akhir',
+                    'fields'  => ['start_date', 'end_date'],
+                ],
+            ], 422);
+        }
+
+        // Query sale_items joined with sales, optionally filtered by date range
+        $query = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id');
+
+        if ($startDate) {
+            $query->whereDate('sales.transaction_date', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->whereDate('sales.transaction_date', '<=', $endDate);
+        }
+
+        // Aggregate summary: total_revenue, total_cogs, total_profit
+        $summary = (clone $query)
+            ->selectRaw('
+                SUM(sale_items.sell_price * sale_items.qty) AS total_revenue,
+                SUM(sale_items.cogs * sale_items.qty)       AS total_cogs
+            ')
+            ->first();
+
+        $totalRevenue = (float) ($summary->total_revenue ?? 0);
+        $totalCogs    = (float) ($summary->total_cogs ?? 0);
+        $totalProfit  = $totalRevenue - $totalCogs;
+        // Avoid division by zero
+        $margin = $totalRevenue > 0 ? ($totalProfit / $totalRevenue) * 100 : 0;
+
+        // Detail per product
+        $products = (clone $query)
+            ->selectRaw('
+                products.id                                     AS product_id,
+                products.name                                   AS product_name,
+                SUM(sale_items.qty)                             AS total_qty,
+                SUM(sale_items.sell_price * sale_items.qty)     AS total_revenue,
+                SUM(sale_items.cogs * sale_items.qty)           AS total_cogs,
+                SUM((sale_items.sell_price - sale_items.cogs) * sale_items.qty) AS total_profit
+            ')
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('total_revenue')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'product_id'    => $row->product_id,
+                    'product_name'  => $row->product_name,
+                    'total_qty'     => (int) $row->total_qty,
+                    'total_revenue' => (float) $row->total_revenue,
+                    'total_cogs'    => (float) $row->total_cogs,
+                    'total_profit'  => (float) $row->total_profit,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'summary'  => [
+                    'total_revenue' => $totalRevenue,
+                    'total_cogs'    => $totalCogs,
+                    'total_profit'  => $totalProfit,
+                    'margin'        => round($margin, 2),
+                ],
+                'products' => $products->values(),
+            ],
+        ]);
+    }
+
     /**
      * GET /api/reports/stock-summary
      * Laporan ringkasan stok: nama produk, SKU, stok saat ini, stok minimum,

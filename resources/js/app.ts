@@ -17,6 +17,9 @@ const LowStockPage = () => import('@/pages/LowStockPage.vue');
 const ReportPage = () => import('@/pages/ReportPage.vue');
 const AuditTrailPage = () => import('@/pages/AuditTrailPage.vue');
 const UserManagementPage = () => import('@/pages/UserManagementPage.vue');
+const PurchasePage = () => import('@/pages/PurchasePage.vue');
+const POSPage = () => import('@/pages/POSPage.vue');
+const ProfitReportPage = () => import('@/pages/ProfitReportPage.vue');
 
 const routes: RouteRecordRaw[] = [
     // Public routes
@@ -98,6 +101,26 @@ const routes: RouteRecordRaw[] = [
         children: [{ path: '', component: UserManagementPage }],
     },
 
+    // POS, Purchase & Profit routes
+    {
+        path: '/purchase',
+        component: () => import('@/components/Layout.vue'),
+        meta: { requiresAuth: true, roles: ['pengelola'] },
+        children: [{ path: '', component: PurchasePage }],
+    },
+    {
+        path: '/pos',
+        component: () => import('@/components/Layout.vue'),
+        meta: { requiresAuth: true, roles: ['pengelola', 'kasir'] },
+        children: [{ path: '', component: POSPage }],
+    },
+    {
+        path: '/reports/profit',
+        component: () => import('@/components/Layout.vue'),
+        meta: { requiresAuth: true, roles: ['pengelola'] },
+        children: [{ path: '', component: ProfitReportPage }],
+    },
+
     // Default redirect
     { path: '/', redirect: () => {
         const user = getUser();
@@ -132,14 +155,23 @@ router.beforeEach((to) => {
     if (to.meta.roles && user) {
         const allowedRoles = to.meta.roles as string[];
         if (!allowedRoles.includes(user.role)) {
-            // Redirect kasir to their default page
-            return user.role === 'kasir' ? { path: '/products' } : { path: '/dashboard' };
+            // Kasir trying to access pengelola-only pages → redirect to /pos with toast
+            if (user.role === 'kasir') {
+                // Schedule toast after navigation completes (router is not yet ready here)
+                setTimeout(() => {
+                    import('@/composables/useToast').then(({ useToast }) => {
+                        useToast().show('Akses tidak diizinkan', 'error');
+                    });
+                }, 0);
+                return { path: '/pos' };
+            }
+            return { path: '/dashboard' };
         }
     }
 
     // Redirect authenticated users away from login
     if (to.path === '/login' && token) {
-        return user?.role === 'kasir' ? { path: '/products' } : { path: '/dashboard' };
+        return user?.role === 'kasir' ? { path: '/pos' } : { path: '/dashboard' };
     }
 });
 

@@ -4,9 +4,11 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -88,11 +90,20 @@ Route::middleware(['auth:api', 'check_active', 'role:pengelola'])->group(functio
 Route::middleware(['auth:api', 'check_active', 'role:pengelola'])->prefix('reports')->group(function () {
     Route::get('/stock-summary', [ReportController::class, 'stockSummary']);
     Route::get('/export', [ReportController::class, 'export']);
+    Route::get('/profit', [ReportController::class, 'profit']);
 });
 
 // Audit log routes — Pengelola only
 Route::middleware(['auth:api', 'check_active', 'role:pengelola'])->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
+});
+
+// Invoice routes — Pengelola only
+Route::middleware(['auth:api', 'check_active', 'role:pengelola'])->group(function () {
+    Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::post('/invoices', [InvoiceController::class, 'store']);
+    Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
+    Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy']);
 });
 
 // Notification routes — all authenticated users
@@ -104,6 +115,12 @@ Route::middleware(['auth:api', 'check_active'])->prefix('notifications')->group(
 
 Route::middleware(['auth:api', 'check_active', 'role:pengelola'])->prefix('notifications')->group(function () {
     Route::post('/send', [NotificationController::class, 'send'])->middleware('throttle:60,1');
+});
+
+// Sale routes — pengelola + kasir
+Route::middleware(['auth:api', 'check_active'])->group(function () {
+    Route::post('/sales', [SaleController::class, 'store']);
+    Route::get('/sales/{id}', [SaleController::class, 'show']);
 });
 
 // Device routes — all authenticated users
