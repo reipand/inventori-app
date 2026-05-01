@@ -1,74 +1,192 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventori App — Inventory & POS Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-stack inventory management and point-of-sale (POS) web application built with **Laravel 13** (REST API backend) and **Vue 3** (SPA frontend). Designed for small-to-medium retail businesses to manage products, transactions, sales, and reports in one place.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Module | Description |
+|---|---|
+| **Authentication** | JWT-based login, forced password change on first login, idle auto-logout |
+| **Role-Based Access** | `pengelola` (owner/manager) and `kasir` (cashier) roles with strict middleware guards |
+| **Product Management** | CRUD products with categories, COGS tracking, and low-stock alerts |
+| **Transactions** | Stock-in (purchase) and stock-out flows with full audit trail |
+| **Point of Sale (POS)** | Kasir-friendly POS page with cart, receipt printing, and sale history |
+| **Invoices / Purchases** | Create and manage supplier invoices with itemized line items |
+| **Reports** | Stock summary, export, and profit report with Chart.js visualizations |
+| **Notifications** | Real-time push notifications via Firebase FCM to registered devices |
+| **Audit Trail** | Every write action is logged — who did what and when |
+| **User Management** | Pengelola can create, edit, deactivate, and delete user accounts |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Backend**
+- PHP 8.3 / Laravel 13
+- JWT Auth (`tymon/jwt-auth`)
+- Firebase Admin SDK (`kreait/laravel-firebase`) for push notifications
+- MySQL 8 (production) / SQLite (local dev)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Frontend**
+- Vue 3 + TypeScript
+- Vue Router 5 + Pinia (state management)
+- Tailwind CSS 4 + Radix Vue + shadcn-vue components
+- Chart.js + vue-chartjs for data visualization
+- Firebase JS SDK for FCM (web push)
+- Vite 8 build tool
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+**CI/CD**
+- GitLab CI — automated test (`phpunit`) and deploy pipeline
+- SSH deploy to production server via GitLab CI variables
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Requirements
+
+- PHP >= 8.3
+- Composer
+- Node.js >= 20
+- MySQL 8 (or SQLite for local)
+- Firebase project (for push notifications)
+
+---
+
+## Local Development Setup
 
 ```bash
-composer require laravel/boost --dev
-composer dump-autoload
-php artisan boost:install
+# 1. Clone the repo
+git clone <repo-url>
+cd inventori-app
 
-php artisan migrate
- php artisan optimize:clear
-  npm install
-  npm run build
+# 2. One-command setup (install deps, generate keys, migrate)
+composer run setup
 
-   php artisan cache:clear
-  php artisan config:clear
-  php artisan route:clear
-  php artisan view:clear
-  php artisan serve
+# 3. Configure environment
+cp .env.example .env
+# Edit .env: set DB credentials, JWT_SECRET, Firebase keys
 
-php artisan serve --host 192.168.0.189  --port 8000
+# 4. Generate JWT secret
+php artisan jwt:secret
 
-  npm run dev
-
+# 5. Start all services (Laravel + queue + Vite hot reload)
+composer run dev
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The app will be available at `http://localhost:8000`.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Environment Variables
 
-## Code of Conduct
+Key variables to configure in `.env`:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+# Database (switch to mysql for production)
+DB_CONNECTION=sqlite
 
-## Security Vulnerabilities
+# JWT
+JWT_SECRET=<generate with: php artisan jwt:secret>
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Firebase (for push notifications)
+FIREBASE_CREDENTIALS=storage/app/firebase-credentials.json
+FIREBASE_PROJECT_ID=your-project-id
+
+# Firebase frontend keys (exposed to Vite)
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_VAPID_KEY=
+```
+
+---
+
+## API Endpoints Overview
+
+All routes are prefixed with `/api`. Protected routes require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/auth/login` | Public |
+| `POST` | `/auth/logout` | Authenticated |
+| `GET` | `/products` | Pengelola, Kasir |
+| `POST` | `/products` | Pengelola only |
+| `GET` | `/products/low-stock` | Pengelola, Kasir |
+| `POST` | `/transactions/in` | Pengelola only |
+| `POST` | `/transactions/out` | Pengelola, Kasir |
+| `POST` | `/sales` | Pengelola, Kasir |
+| `GET` | `/reports/profit` | Pengelola only |
+| `GET` | `/reports/export` | Pengelola only |
+| `GET` | `/audit-logs` | Pengelola only |
+| `GET` | `/invoices` | Pengelola only |
+| `GET/POST` | `/notifications` | Authenticated |
+
+A full Postman collection is available at [`postman/inventori-pos.postman_collection.json`](postman/inventori-pos.postman_collection.json).
+
+---
+
+## Running Tests
+
+```bash
+# PHP unit tests
+composer run test
+
+# Frontend unit tests (Vitest)
+npm run test
+
+# Watch mode
+npm run test:watch
+```
+
+---
+
+## Production Deployment
+
+The GitLab CI pipeline automatically:
+1. Runs the full test suite on every push
+2. On merge to `main`: SSH into the production server, pulls latest code, runs migrations, rebuilds assets, and restarts PHP-FPM + Nginx
+
+Required GitLab CI/CD variables:
+- `SSH_PRIVATE_KEY` — base64-encoded ed25519 private key
+- `SERVER_IP` — production server IP
+- `SERVER_USER` — SSH user
+- `GITLAB_TOKEN` — GitLab personal access token for git pull
+
+---
+
+## Project Structure
+
+```
+inventori-app/
+├── app/
+│   ├── Http/Controllers/   # API controllers
+│   ├── Http/Middleware/    # JWT, role, active-user guards
+│   ├── Models/             # Eloquent models
+│   └── Services/           # NotificationService (FCM)
+├── database/
+│   ├── migrations/         # Schema history
+│   └── seeders/            # Dev seed data
+├── resources/js/
+│   ├── pages/              # Vue page components
+│   ├── components/         # Shared UI components
+│   ├── stores/             # Pinia stores (auth, cart, dashboard)
+│   └── services/           # Axios API service layer
+└── routes/api.php          # All API route definitions
+```
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT
+
+---
+
+## Credits
+
+**Reisan Adrefa** — Project Work 2025–2026
+
+> Developed as a complete inventory management and POS system for retail business operations.
